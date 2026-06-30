@@ -154,44 +154,29 @@ with st.sidebar:
         
     st.markdown("**Carpeta de destino:**")
     
+    # Siempre permitimos escribir o ver la ruta en una caja de texto
+    dest_dir = st.text_input(
+        "Ruta de Descarga Local", 
+        value=st.session_state.dest_dir,
+        label_visibility="collapsed"
+    )
+    st.session_state.dest_dir = dest_dir
+    
     if HAS_GUI:
-        # Contenedor con borde punteado que imita el diseño de st.file_uploader
-        st.markdown(
-            f"""
-            <div style="
-                border: 1px dashed rgba(255, 255, 255, 0.15);
-                border-radius: 8px;
-                padding: 20px 10px;
-                text-align: center;
-                background-color: rgba(255, 255, 255, 0.02);
-                margin-bottom: 10px;
-            ">
-                <span style="font-size: 28px;">📁</span>
-                <div style="font-size: 13px; margin-top: 8px; color: #e2e8f0; font-weight: 500; word-break: break-all; font-family: monospace; padding: 0 5px;">
-                    {st.session_state.dest_dir}
-                </div>
-                <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">
-                    Carpeta seleccionada para descargas
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        
-        # Botón largo que imita el "Browse files" de Streamlit
-        if st.button("Examinar carpetas", use_container_width=True, help="Selecciona la carpeta en tu computadora"):
+        # En local, agregamos el botón de examinar carpetas
+        if st.button("📁 Examinar carpeta", use_container_width=True, help="Selecciona la carpeta en tu computadora"):
             folder_path = select_folder_modern(st.session_state.dest_dir if st.session_state.dest_dir else default_dir)
             if folder_path:
                 st.session_state.dest_dir = folder_path
                 st.rerun()
     else:
-        st.info("☁️ **Servidor en la Nube**: El selector de carpetas local está desactivado. Los artículos se descargarán temporalmente en el servidor y podrás descargarlos en un solo archivo `.zip` al finalizar.")
+        st.info("☁️ **Servidor en la Nube**: El selector de carpetas visual está desactivado. Escribe la ruta de descarga arriba si lo deseas (se guardará en el servidor y podrás descargar el archivo `.zip` al finalizar).")
         
     dest_dir = st.session_state.dest_dir
     
     if dest_dir:
         if not os.path.exists(dest_dir):
-            st.warning("⚠️ La ruta no existe. Se creará al descargar.")
+            st.warning("⚠️ La ruta no existe en el servidor. Se creará al descargar.")
         else:
             st.success("✓ Carpeta válida.")
             
