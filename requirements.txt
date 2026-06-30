@@ -1,6 +1,7 @@
 streamlit
 python-docx
 pdfplumber
+pypdf
 curl_cffi
 requests
 pandas
