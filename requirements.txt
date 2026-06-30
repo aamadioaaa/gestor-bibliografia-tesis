@@ -1,0 +1,6 @@
+streamlit
+python-docx
+pdfplumber
+curl_cffi
+requests
+pandas

@@ -1,0 +1,622 @@
+[0] Capítulo 3
+[1] Los datos y su análisis
+[2] "Los sistemas sanos son fractales complejos (caos estructurado). La enfermedad rompe esa complejidad, volviendo al sistema o muy aleatorio (ruido) o muy rígido (periódico/inercial)."  (Goldberger et al., 2002)
+[3] Este capítulo presenta el análisis de las señales de glucosa obtenidas mediante monitoreo continuo de glucosa (CGM). El propósito no es interpretar visualmente cada excursión glucémica aislada, sino construir descriptores reproducibles que permitan comparar la organización temporal de la señal en sujetos sin diabetes tipo 2 (NDBT2) y en sujetos con diagnóstico de diabetes mellitus tipo 2 (DBT2).
+[4] En primer lugar, se describe la señal cruda y se analizan sus propiedades espectrales, con el fin de caracterizar la distribución de energía en distintas escalas temporales. A partir de ese análisis se estima el exponente asociado al ruido coloreado y, de manera complementaria, el exponente de Hurst mediante análisis de fluctuaciones sin tendencia (DFA), como medida de memoria temporal (Peng et al., 1995).
+[5] En una segunda etapa, el análisis se orienta hacia la extracción de características dinámicas derivadas de la serie: la velocidad de cambio de la glucosa, la volatilidad local y el indicador de forzamiento metabólico (). Estas magnitudes no reemplazan a la señal original, sino que permiten describir aspectos específicos de su evolución: la dirección del cambio, la intensidad local de las fluctuaciones y la presencia de eventos metabólicos de mayor amplitud o persistencia.
+[6] Finalmente, estos resultados se articulan con herramientas de análisis no lineal e informacional, como el exponente de Lyapunov y el plano entropía-complejidad (). De este modo, el capítulo avanza desde una descripción inicial de los registros hacia cuantificadores capaces de resumir propiedades espectrales, fractales, dinámicas e informacionales de las señales.
+[7] 
+[8] Introducción
+[9] La señal glucémica ambulatoria combina oscilaciones circadianas, respuestas posprandiales, mecanismos de retroalimentación, variabilidad biológica de corto plazo y componentes instrumentales propios del sensor. Por esta razón, cada transformación aplicada a los datos se introduce indicando qué componente de la señal se busca preservar y qué componente se intenta atenuar. Esta precaución es central para evitar interpretar como “ruido” toda variabilidad de alta frecuencia o, en sentido contrario, atribuir significado fisiológico directo a fluctuaciones que pueden depender del preprocesamiento.
+[10] Con el propósito de fijar una referencia inicial sobre la constitución de los registros CGM, se presenta un recorte de 24 h correspondiente a un único día de medición para un sujeto NDBT2 y un sujeto con DBT2, dado un muestreo de 15 min, el intervalo de 24 h queda representado por 96 observaciones consecutivas. La Figura 3 muestra ambos perfiles diarios superpuestos, lo que permite identificar, en forma preliminar, diferencias en amplitud de variación, presencia de excursiones transitorias y cambios de nivel basal, sin inferir aún conclusiones diagnósticas a partir de la inspección visual (Amadio et al., 2022).
+[11] 
+[12] 
+[13] 
+[14] 
+[15] 
+[16] 
+[17] 
+[18] Figura 3 Ejemplo de registros de 24 horas de sujetos NDBT2 y DBT2.Figura 3 Ejemplo de registros de 24 horas de sujetos NDBT2 y DBT2.Figura 3 Ejemplo de registros de 24 horas de sujetos NDBT2 y DBT2.Figura 3 Ejemplo de registros de 24 horas de sujetos NDBT2 y DBT2.
+[19] Figura 3 Ejemplo de registros de 24 horas de sujetos NDBT2 y DBT2.
+[20] Figura 3 Ejemplo de registros de 24 horas de sujetos NDBT2 y DBT2.
+[21] 
+[22] En el ejemplo considerado, el perfil del sujeto NDBT2 se organiza alrededor de valores relativamente estables, con oscilaciones moderadas y excursiones acotadas. En cambio, el sujeto con DBT2 exhibe variaciones de mayor amplitud y episodios de elevación más sostenidos en determinados tramos del día. Esta comparación, deliberadamente descriptiva, cumple una función metodológica: mostrar que la inspección visual de la señal cruda permite reconocer diferencias generales, pero no alcanza por sí sola para caracterizar de manera reproducible la dinámica glucémica.
+[23] Por esta razón, el análisis se orienta luego hacia cuantificadores derivados de la teoría de la información, como la entropía de permutación y la complejidad estadística, que permiten describir la organización temporal de la señal más allá de sus valores absolutos. Posteriormente, se incorporan herramientas de representación y reducción de información, como la Transformada Discreta del Coseno (DCT), utilizada para concentrar la información relevante de una señal en componentes de baja frecuencia, y el Análisis de Componentes Principales (PCA), empleado para explorar estructuras dominantes en conjuntos de características. Estas herramientas permiten sintetizar la información contenida en las series, preservar rasgos dinámicos y geométricos relevantes, y eventualmente evaluar estrategias de aumento de datos cuando el tamaño muestral resulte limitado.
+[24] Caracterización del Ruido Metabólico
+[25] Antes de analizar la señal glucémica mediante herramientas dinámicas e informacionales, resulta necesario caracterizar el tipo de fluctuaciones que aparecen en los registros. En este trabajo, el término ruido metabólico no se utiliza sólo para referirse a errores de medición o interferencias instrumentales, sino también a las variaciones de corto y mediano plazo que emergen de la propia regulación fisiológica.
+[26] La glucosa medida por CGM combina componentes lentas, asociadas al ritmo circadiano y a las respuestas posprandiales, con fluctuaciones más rápidas vinculadas a la variabilidad biológica, los mecanismos de retroalimentación y las limitaciones del sensor. Por esta razón, la caracterización del ruido permite distinguir qué parte de la señal presenta comportamiento persistente, aleatorio o inercial, y aporta un primer criterio para comparar la dinámica de los grupos NDBT2 y DBT2.
+[27] Fundamentación Teórica
+[28] En el modelado de sistemas fisiológicos, el término estocástico (ruido) no representa simplemente un error de medición o una interferencia externa, sino que refleja la complejidad intrínseca y los mecanismos de regulación del sistema biológico subyacente. Para clasificar estas fluctuaciones se utiliza el exponente espectral del ruido coloreado, denotado como , definido a partir de la relación de ley de potencia entre la densidad espectral de potencia y la frecuencia, . Tradicionalmente, muchas simulaciones simplificadas asumen la presencia de ruido blanco gaussiano, lo que implica fluctuaciones independientes y sin memoria temporal (Gardiner, 2004; Kasdin, 1995).
+[29] Sin embargo, la literatura científica sugiere que los sistemas fisiológicos sanos, como el ritmo cardíaco o la actividad neuronal, exhiben propiedades fractales características del ruido rosa. Este tipo de dinámica indica la presencia de correlaciones a largo plazo y una memoria del sistema que facilita la adaptabilidad y la homeostasis ante perturbaciones externas (Goldberger et al., 2002). Por el contrario, la pérdida de esta complejidad fractal y la transición hacia regímenes más aleatorios o, inversamente, más correlacionados e inerciales, como el ruido browniano, suelen asociarse con envejecimiento o estados patológicos (Lipsitz, 2002).
+[30] Metodología de Detección Espectral
+[31] Para aislar y clasificar el ruido metabólico presente en los registros de CGM, se implementó un algoritmo de descomposición de señal en dos etapas:
+[32] Definición de la componente de ruido: la componente de ruido metabólico se define como la señal de glucosa observada menos su tendencia (ec. 3.1). En este trabajo dicha tendencia se toma como el nivel medio constante de la señal, evitando de manera deliberada la sustracción de una tendencia dependiente del tiempo: el valor absoluto del exponente espectral es sensible al grado de remoción de las componentes lentas, mientras que la diferencia entre grupos permanece invariante frente a esa elección. Por ese motivo el descriptor se reporta sobre la señal con media removida y la comparación entre clases se sustenta en la diferencia de exponentes, que es robusta.
+[33]                                                       (3.1)
+[34] Análisis de Densidad Espectral de Potencia (PSD): se calculó el espectro de potencia de la señal mediante el método de Welch. Posteriormente, se analizó la relación entre la potencia y la frecuencia en escala logarítmica para determinar el exponente espectral del ruido coloreado βc, según la ley de potencia de la ecuación (3.2).
+[35]                                                               (3.2)
+[36] La Figura 3.1.2 presenta el espectro de potencia promedio de cada grupo en escala log-log, junto con las rectas de pendiente ajustadas sobre la región de escala.
+[37] Figura 3.1.2. Densidad espectral de potencia media de la glucosa por grupo, en escala log-log, con las rectas de pendiente βc sobre la región de escala.Figura 3.1.2. Densidad espectral de potencia media de la glucosa por grupo, en escala log-log, con las rectas de pendiente βc sobre la región de escala.Figura 3.1.2. Densidad espectral de potencia media de la glucosa por grupo, en escala log-log, con las rectas de pendiente βc sobre la región de escala.Figura 3.1.2. Densidad espectral de potencia media de la glucosa por grupo, en escala log-log, con las rectas de pendiente βc sobre la región de escala.
+[38] Figura 3.1.2. Densidad espectral de potencia media de la glucosa por grupo, en escala log-log, con las rectas de pendiente βc sobre la región de escala.
+[39] Figura 3.1.2. Densidad espectral de potencia media de la glucosa por grupo, en escala log-log, con las rectas de pendiente βc sobre la región de escala.
+[40] 
+[41] 
+[42] 
+[43] 
+[44] 
+[45] 
+[46] 
+[47] 
+[48] 
+[49] 
+[50] 
+[51] En la Figura 3.1.2 se observa que ambos grupos siguen una ley de potencia en un amplio rango de frecuencias. En la banda de baja frecuencia el espectro presenta una meseta compatible con la regulación homeostática, mientras que la pendiente característica se establece en el rango intermedio del espectro. El ajuste lineal en escala log-log proporciona el exponente , utilizado como descriptor de la estructura espectral de la dinámica glucémica.
+[52] Resultados de la Caracterización
+[53] El análisis espectral reveló una diferencia sistemática entre la dinámica glucémica de los grupos NDBT2 y DBT2. Se analizaron registros de días ( muestras) de  sujetos por grupo, aplicando el método de Welch con segmentos de  puntos y  de solapamiento. El exponente  se obtuvo por regresión lineal en escala log-log sobre la totalidad de la banda de frecuencias resuelta, de acuerdo con el uso estándar de la PSD para caracterizar ruido coloreado y procesos de ley de potencia (Welch, 1967; Kasdin, 1995).
+[54] El grupo NDBT2 presentó un exponente promedio  (media ± desvío estándar). Este valor sitúa la dinámica glucémica en un régimen cercano al ruido browniano, característico de procesos con correlaciones temporales de mediano alcance, y la baja dispersión del exponente sugiere homogeneidad en los mecanismos de regulación del grupo control. Cabe señalar que el valor absoluto del exponente depende del preprocesamiento aplicado a la señal —en particular, del grado de sustracción de tendencias lentas—, por lo que la caracterización del color absoluto debe interpretarse a igualdad de método; la diferencia entre grupos, en cambio, es independiente de esa elección.
+[55] En contraste, el grupo DBT2 exhibió un exponente promedio mayor, , desplazado hacia un régimen de mayor correlación temporal. La diferencia entre grupos resultó altamente significativa (prueba  de Welch , con un tamaño de efecto grande, d de Cohen = ); dado que la normalidad del grupo NDBT2 es marginal (Shapiro–Wilk ), la comparación se respaldó con la prueba no paramétrica de Mann–Whitney, que coincide en el resultado (). En términos dinámicos, el mayor exponente del grupo DBT2 indica mayor inercia: una vez que la glucosa se aparta de su equilibrio, el sistema tiende a sostener la desviación durante más tiempo. La mayor dispersión del exponente en DBT2 (frente a  en NDBT2) sugiere heterogeneidad en el grado de deterioro regulatorio, interpretación que se lee de manera complementaria al exponente de Hurst estimado por DFA.
+[56] 
+[57] 
+[58] 
+[59] 
+[60] 
+[61] 
+[62] 
+[63] 
+[64] Figura 3.1.3. Distribución del exponente espectral βc por grupo (n = 19 + 19), con media y desvío estándar.Figura 3.1.3. Distribución del exponente espectral βc por grupo (n = 19 + 19), con media y desvío estándar.Figura 3.1.3. Distribución del exponente espectral βc por grupo (n = 19 + 19), con media y desvío estándar.Figura 3.1.3. Distribución del exponente espectral βc por grupo (n = 19 + 19), con media y desvío estándar.
+[65] Figura 3.1.3. Distribución del exponente espectral βc por grupo (n = 19 + 19), con media y desvío estándar.
+[66] Figura 3.1.3. Distribución del exponente espectral βc por grupo (n = 19 + 19), con media y desvío estándar.
+[67] 
+[68] 
+[69] 
+[70] 
+[71] 
+[72] 
+[73] 
+[74] 
+[75] 
+[76] 
+[77] 
+[78] La Figura 3.1.3 muestra la distribución del exponente  en cada grupo, con su media y desvío estándar. La separación entre los valores de NDBT2 y DBT2 () indica que el grupo diabético concentra mayor potencia relativa en las componentes de baja frecuencia, lo que se interpreta como mayor persistencia temporal e inercia regulatoria. Esta diferencia entre clases se mantiene prácticamente constante con independencia del preprocesamiento, lo que la convierte en el descriptor espectral más robusto de la comparación.
+[79] Desde una perspectiva dinámica, los distintos tipos de ruido se vinculan mediante operaciones de integración: la integración temporal de una señal incrementa en dos unidades el exponente espectral . Así, integrar ruido blanco produce ruido browniano. En este marco, la glucosa del grupo NDBT2, con , es compatible con la integración de un forzamiento prácticamente sin correlación, mientras que el exponente mayor del grupo DBT2 exige que el forzamiento subyacente posea correlación temporal propia. Dado que la integración desplaza el exponente por igual en ambos grupos, la diferencia observada no proviene de la estructura de integración sino del forzamiento mismo; esta diferencia podría considerarse un biomarcador cuantificable del deterioro en la capacidad de regulación homeostática asociada a la diabetes mellitus tipo 2.
+[80] 
+[81] Exponente de Hurst mediante análisis de fluctuaciones sin tendencia (DFA)
+[82] Con el fin de contrastar la interpretación obtenida mediante el exponente espectral, se estimó de manera complementaria el exponente de Hurst mediante análisis de fluctuaciones sin tendencia (Detrended Fluctuation Analysis, DFA). El exponente de Hurst se utiliza como una medida de memoria temporal: valores cercanos a  son compatibles con fluctuaciones sin correlación de largo alcance; valores mayores que  indican persistencia, es decir, tendencia a que los incrementos mantengan su dirección; y valores menores que  indican antipersistencia, asociada a alternancia o reversión de signo. En señales fisiológicas no estacionarias, el DFA resulta particularmente apropiado porque estima el crecimiento de la fluctuación residual al aumentar la escala temporal, luego de remover tendencias locales (Hurst, 1951; Peng et al., 1995; Kantelhardt et al., 2001).
+[83] Sea  una serie temporal discreta de longitud N. En primer lugar, se construye el perfil integrado respecto de la media:
+[84]                                    (3.3)
+[85] Luego, el perfil  se divide en ventanas de tamaño . En cada ventana se ajusta una tendencia polinómica local  y se calcula la fluctuación cuadrática media:
+[86]                                   .                                    (3.4)
+[87] Si la señal presenta comportamiento de escala, la función de fluctuación sigue aproximadamente una ley de potencia:
+[88]                                 (3.5)
+[89] En esta tesis se informa como exponente DFA y se interpreta como estimador de memoria temporal o persistencia cuando la señal analizada permite esa lectura. Esta precaución es importante porque la glucosa observada  y el residuo no representan el mismo nivel de la dinámica:  conserva componentes lentas y circadianas, mientras que el residuo atenúa la tendencia lenta y permite observar con mayor énfasis el componente fluctuante utilizado en la caracterización espectral.
+[90] Se analizaron  sujetos DBT2 y  sujetos NDBT2. El DFA se aplicó con detrending lineal (DFA de orden 1) sobre escalas entre  y  muestras, equivalentes aproximadamente a .
+[91] Se estimó  sobre dos señales: la glucosa observada  y la componente fluctuante , obtenida al sustraer la tendencia lenta estimada mediante el filtro de Savitzky-Golay. Esta elección se fundamenta en que el DFA fue propuesto para cuantificar correlaciones de largo alcance en series fisiológicas no estacionarias, reduciendo la influencia de tendencias lentas sobre la estimación de memoria temporal (Peng et al., 1995; Kantelhardt et al., 2001). A su vez, el filtro de Savitzky-Golay permite estimar una tendencia local mediante ajuste polinómico por mínimos cuadrados, preservando la forma general de la señal mejor que un promedio móvil simple (Savitzky & Golay, 1964). Por lo tanto, el análisis conjunto de  y  permite contrastar la memoria temporal de la señal primaria con la del componente fluctuante usado para estimar .
+[92] Señal
+[93] NDBT2 (n=20)
+[94] DBT2 (n=20)
+[95] Lectura
+[96] 
+[97] 
+[98] 
+[99] DBT2: mayor persistencia relativa
+[100] 
+[101] 
+[102] 
+[103] DBT2: menor antipersistencia
+[104] Tabla 3.1.4.1. Resumen del exponente DFA por grupo y señal.
+[105] La glucosa observada presentó  en ambos grupos, lo que indica persistencia temporal. Sin embargo, el grupo DBT2 mostró un valor medio mayor que el grupo NDBT2. Esta diferencia es consistente con una dinámica más lenta o inercial: una vez que la glucosa se aleja de su nivel de referencia, el sistema tiende a sostener esa desviación durante más tiempo. En el residuo, los exponentes fueron menores que , por lo que no corresponde hablar de persistencia absoluta; no obstante, DBT2 volvió a presentar valores mayores que NDBT2, lo que indica menor antipersistencia relativa en el componente fluctuante.
+[106] 
+[107] 
+[108] 
+[109] 
+[110] 
+[111] 
+[112] 
+[113]        Figura 3.1.4.1. DFA aplicado a la glucosa observada G(t).
+[114] En la Figura 3.1.4.1, el panel A muestra las curvas contra log n para las series individuales y los promedios por grupo. El panel B presenta la distribución de por grupo. La mayor media observada en DBT2 respalda una lectura de mayor persistencia temporal en la señal glucémica primaria, aunque con solapamiento entre sujetos.
+[115] El DFA no reemplaza al análisis espectral, sino que lo complementa desde el dominio temporal. La PSD describe cómo se distribuye la potencia en función de la frecuencia, mientras que el DFA estima cómo crece la fluctuación residual al aumentar la escala temporal. Por lo tanto, la concordancia entre ambos enfoques fortalece la interpretación de mayor persistencia e inercia en DBT2.
+[116] En conjunto, los resultados indican que el grupo DBT2 no sólo concentra mayor potencia en componentes lentas, como se observó en el análisis espectral, sino que también presenta mayor memoria temporal en el análisis DFA aplicado a la glucosa observada y al residuo. Esta doble evidencia permite sostener con mayor cautela y reproducibilidad que la señal glucémica de los sujetos DBT2 posee una dinámica más inercial, compatible con una menor capacidad de compensación homeostática frente a perturbaciones.
+[117] Esta conclusión debe entenderse como una caracterización dinámica de las series disponibles y no como una inferencia clínica directa. La interpretación se apoya en la consistencia entre  y , pero requiere ser validada con muestras más amplias y con registros complementarios de ingesta, sueño, actividad física y medicación.
+[118]  Extracción de Características Dinámicas
+[119] Para caracterizar la dinámica glucémica más allá de los valores absolutos de concentración, se realizó un procesamiento de la señal original enfocado en dos propiedades fundamentales: la velocidad de cambio (cinética) y la energía local (volatilidad). Este análisis permite identificar patrones de estabilidad e inestabilidad que no son evidentes en la serie temporal cruda.
+[120] Estimación de la Velocidad de Cambio (Derivada)
+[121] La primera etapa del análisis consistió en calcular la velocidad de variación de la glucosa, lo que físicamente representa la derivada temporal de la señal (). Dado que las mediciones biológicas son discretas y poseen ruido intrínseco, se desestimó el uso de diferencias finitas simples (que amplifican el ruido). En su lugar, se aplicó el método diferencias centradas, que calcula la tasa de cambio utilizando los puntos inmediatamente anterior y posterior a cada muestra. Matemáticamente, para un intervalo de muestreo  minutos, la velocidad  se define como:
+[122]                                                                                          (3.6)
+[123] Sin embargo, en el análisis de señales biomédicas, las derivadas numéricas son propensas a amplificar el ruido de alta frecuencia producido por el sensor. Para obtener una métrica de velocidad más estable, se introdujo una etapa de acondicionamiento no lineal mediante la función tangente hiperbólica (t). Esta elección metodológica no se propone como modelo fisiológico cerrado, sino como una transformación de rango dinámico destinada a atenuar outliers y preservar la dirección del cambio glucémico.
+[124] Se define la velocidad acondicionada  como:
+[125]                                         ,                                                (3.7)
+[126] donde  es la desviación estándar de la derivada del sujeto y  el factor de compresión típicamente de .
+[127] La inclusión de la función  actúa como un filtro de rango dinámico. Para variaciones glucémicas normales, la transformación es aproximadamente lineal (ta), preservando la información original. Ante cambios abruptos o anomalías del sensor (outliers), la función satura suavemente y acota la velocidad a rangos biológicos plausibles. Esto permite analizar la cinética del paciente con menor influencia de eventos espurios. La Figura 3.2.1 muestra un ejemplo de esta aplicación.
+[128] 
+[129] 
+[130] 
+[131] 
+[132] 
+[133] 
+[134] 
+[135] 
+[136] 
+[137] 
+[138] 
+[139] Figura 3.2.1. Glucosa y velocidad de cambio acondicionada durante 24 h.Figura 3.2.1. Glucosa y velocidad de cambio acondicionada durante 24 h.Figura 3.2.1. Glucosa y velocidad de cambio acondicionada durante 24 h.Figura 3.2.1. Glucosa y velocidad de cambio acondicionada durante 24 h.
+[140] Figura 3.2.1. Glucosa y velocidad de cambio acondicionada durante 24 h.
+[141] 
+[142] Figura 3.2.1. Glucosa y velocidad de cambio acondicionada durante 24 h.
+[143] 
+[144] En la Figura 3.2.1, la derivada cruda permite identificar subidas y bajadas rápidas de glucosa, pero también amplifica fluctuaciones de alta frecuencia. La versión acondicionada con  mantiene el signo y la tendencia de la variación, mientras limita valores extremos que podrían corresponder a transiciones no representativas.
+[145] Análisis de Energía Local mediante Enventanado Deslizante
+[146] Para cuantificar la "volatilidad" o "agitación" del sistema metabólico en distintos momentos del día, se implementó una técnica de enventanado deslizante (sliding window). Este método consiste en definir una ventana temporal de ancho  que se desplaza punto a punto sobre la serie temporal. En este estudio, se seleccionó una ventana de  muestras (equivalente a  minutos), centrada en el instante de interés. Dentro de cada ventana, se calcula la varianza de los datos de glucosa. Esta varianza local se interpreta como la "Energía" de la señal ():
+[147] (3.8)
+[148] donde  es la media de la glucosa dentro de esa ventana específica.
+[149] Los valores bajos de  indican períodos de estabilidad glucémica (el sujeto está en reposo metabólico). Valores altos indican transiciones fuertes o inestabilidad, independientemente de si la glucosa está subiendo o bajando.
+[150] Suavizado Espectral mediante Transformada Discreta del Coseno (DCT)
+[151] La señal de energía local obtenida mediante el enventanado deslizante puede contener variaciones rápidas asociadas tanto a fluctuaciones fisiológicas de corto plazo como a variabilidad instrumental del registro. Como el objetivo de esta etapa no es analizar cada oscilación puntual, sino obtener una envolvente que represente períodos de mayor o menor volatilidad metabólica, se aplicó un suavizado espectral mediante la Transformada Discreta del Coseno (DCT). Esta operación actúa sobre  y debe distinguirse del acondicionamiento no lineal aplicado previamente sobre la velocidad . Mientras la función  limita la amplitud de cambios abruptos en la derivada glucémica, la DCT se utiliza para conservar la estructura lenta de la energía local y atenuar componentes rápidas. De este modo, ambas operaciones cumplen funciones diferentes dentro de la construcción de .
+[152] La DCT es una técnica de transformación en base a funciones ortogonales ampliamente utilizada en procesamiento digital de señales y compresión de datos, debido a su capacidad para concentrar la energía de la señal en unos pocos coeficientes de baja frecuencia (Ahmed et al., 1974). A diferencia de la Transformada Discreta de Fourier (DFT), la DCT opera con coeficientes reales y suele reducir discontinuidades en los bordes al asumir una extensión par de la señal. Matemáticamente, para una secuencia de energía local discreta  de longitud , la transformación al dominio de los coeficientes espectrales se expresa como:
+[153]                             (3.9)
+[154] donde  es el índice de la muestra temporal,  es el índice del coeficiente espectral (frecuencia),  es el número total de muestras en la ventana de observación.
+[155] Una vez obtenida la representación espectral, se procedió a realizar un recorte del espectro (filtrado pasa-bajos). Se definió un umbral de corte equivalente al del espectro total, bajo la premisa de que la información metabólica relevante reside en las frecuencias bajas. Los coeficientes de alta frecuencia, asociados a componentes rápidas de la señal y a variabilidad de corto plazo, fueron anulados:
+[156]                                             .                                    (3.10)
+[157] Finalmente, para recuperar la señal de energía suavizada en el dominio del tiempo, , se aplicó la Transformada Inversa Discreta del Coseno (IDCT) sobre los coeficientes filtrados :
+[158]                                                             (3.11)
+[159] donde  es un factor de normalización necesario para garantizar la ortogonalidad de la transformación. El resultado de este proceso es una curva continua que describe la intensidad de la fluctuación metabólica a lo largo del día, con menor peso de las componentes rápidas. En la Figura 3.2.3 se observa la excursión glucémica junto con la energía local reconstruida mediante DCT; valores altos de esta energía indican períodos de mayor volatilidad estructural, mientras que valores bajos corresponden a intervalos de mayor estabilidad.
+[160] 
+[161] 
+[162] 
+[163] 
+[164] 
+[165] 
+[166] 
+[167] Figura 3.2.3. Excursión glucémica y energía local reconstruida mediante DCT.Figura 3.2.3. Excursión glucémica y energía local reconstruida mediante DCT.Figura 3.2.3. Excursión glucémica y energía local reconstruida mediante DCT.Figura 3.2.3. Excursión glucémica y energía local reconstruida mediante DCT.
+[168] Figura 3.2.3. Excursión glucémica y energía local reconstruida mediante DCT.
+[169] Figura 3.2.3. Excursión glucémica y energía local reconstruida mediante DCT.
+[170] 
+[171] 
+[172] 
+[173] 
+[174] 
+[175] 
+[176] 
+[177] 
+[178] 
+[179] 
+[180] 
+[181] 
+[182] 
+[183] 
+[184] Indicador de Forzamiento Metabólico 
+[185] Finalmente, la construcción del indicador de forzamiento  se formaliza mediante el acoplamiento multiplicativo de la cinética no lineal y la volatilidad estructural. Para garantizar la consistencia dimensional y acotar el factor de ganancia, se define primero la Energía Normalizada :
+[186]                                        .                                                            (3.12)
+[187] donde  es la energía local suavizada mediante DCT y el denominador representa el máximo histórico registrado para el sujeto; por lo tanto, queda acotada entre 0 y 1, de modo que la construcción de conserve las unidades de una velocidad glucémica.
+[188] 
+[189] Variable o ecuación
+[190] Unidad
+[191] Referencia dimensional
+[192] 
+[193] 
+[194] Señal de glucosa
+[195] 
+[196] 
+[197] Tiempo
+[198] 
+[199] 
+[200] Intervalo de muestreo del CGM
+[201] 
+[202] 
+[203] Velocidad de cambio por diferencias centradas
+[204] 
+[205] 
+[206] Velocidad acondicionada
+[207] 
+[208] 
+[209] Desviación estándar de v(t)
+[210] 
+[211] 
+[212] Factor de compresión
+[213] 
+[214] 
+[215] Energía local suavizada que se normaliza
+[216] 
+[217] 
+[218] Energía normalizada: 0 ≤ Ê(t) ≤ 1
+[219] 
+[220] 
+[221] Ponderación por volatilidad
+[222] 
+[223] 
+[224] Indicador de forzamiento metabólico
+[225] 
+[226] 
+[227] 
+[228] 
+[229] 
+[230] 
+[231] Tabla 3.2.4.1. Variables, ecuaciones y unidades utilizadas en la construcción de S(t).
+[232] Finalmente, las características extraídas se fusionaron para constituir el indicador , una métrica derivada que resume la actividad metabólica del sujeto:
+[233]                 (3.13)
+[234] Este indicador  no es una medición directa, sino una característica sintetizada que pondera la velocidad del cambio glucémico por la estabilidad del contexto en el que ocurre. Un valor alto de indica un cambio rápido en un entorno de alta volatilidad (por ejemplo, posprandial), mientras que el mismo cambio de velocidad en un entorno de baja energía es atenuado, interpretándose como variabilidad basal.
+[235] En conclusión, S(t) se comporta como una sigmoide adaptativa: su forma está dictada por la dirección del cambio glucémico, pero su magnitud efectiva es amplificada o suprimida dinámicamente según la volatilidad estructural del contexto. Este mecanismo permite distinguir eventos fisiológicos que poseen tanto dirección como energía. La Figura 3.2.4 muestra un día de glucosa junto con su indicador de forzamiento metabólico.
+[236] 
+[237] 
+[238] 
+[239] 
+[240] 
+[241] 
+[242] 
+[243] 
+[244] 
+[245] 
+[246] 
+[247] 
+[248] 
+[249] 
+[250] 
+[251] 
+[252] 
+[253] 
+[254] 
+[255] 
+[256] Figura 3.2.4. Perfil de glucosa e indicador de forzamiento metabólico.
+[257] Resultados del Análisis Espectral del Forzamiento Metabólico
+[258] Tras la construcción de la señal de forzamiento  para los grupos de estudio, se procedió a analizar su estructura en el dominio de la frecuencia. El objetivo fue determinar si la diabetes Mellitus tipo 2 altera la distribución de energía del sistema de regulación, más allá de los cambios conocidos en los valores medios de glucosa.
+[259] La Figura 3.2.5 resume la caracterización espectral del indicador de forzamiento y la compara con la de la glucosa, para los grupos NDBT2 y DBT2.
+[260] 
+[261] 
+[262] 
+[263] 
+[264] Figura 3.2.5. Exponente espectral del forzamiento S(t) y de la glucosa G(t) por grupo; la diferencia entre clases (Δβ ≈ 0,55) se conserva entre ambos niveles 1Figura 3.2.5. Exponente espectral del forzamiento S(t) y de la glucosa G(t) por grupo; la diferencia entre clases (Δβ ≈ 0,55) se conserva entre ambos niveles 1Figura 3.2.5. Exponente espectral del forzamiento S(t) y de la glucosa G(t) por grupo; la diferencia entre clases (Δβ ≈ 0,55) se conserva entre ambos niveles 1Figura 3.2.5. Exponente espectral del forzamiento S(t) y de la glucosa G(t) por grupo; la diferencia entre clases (Δβ ≈ 0,55) se conserva entre ambos niveles 1
+[265] Figura 3.2.5. Exponente espectral del forzamiento S(t) y de la glucosa G(t) por grupo; la diferencia entre clases (Δβ ≈ 0,55) se conserva entre ambos niveles 1
+[266] Figura 3.2.5. Exponente espectral del forzamiento S(t) y de la glucosa G(t) por grupo; la diferencia entre clases (Δβ ≈ 0,55) se conserva entre ambos niveles 1
+[267] 
+[268] 
+[269] 
+[270] 
+[271] 
+[272] 
+[273] 
+[274] 
+[275] 
+[276] 
+[277] 
+[278] El forzamiento presenta un exponente espectral en el grupo NDBT2 y  en el grupo DBT2 (prueba t de Welch este último valor es próximo al del ruido rosa (β ≈ 1). El resultado es estable frente al corte espectral empleado en el suavizado de la energía local. Los sujetos DBT2 concentran mayor potencia en las componentes lentas del forzamiento, lo que indica que su señal está dominada por oscilaciones de mayor amplitud y persistencia, mientras que en NDBT2 el perfil es más plano.
+[279] Para cuantificar estas observaciones, se analizaron los espectros promedio en escala log-log, como se observa en la Figura 3.2.5(B). La relación aproximadamente lineal en esta escala es compatible con una ley de potencia  en la banda de baja frecuencia, característica de procesos con correlaciones temporales o invariancia de escala (Kasdin, 1995; Goldberger et al., 2002). En esta sección se utiliza  para el exponente ajustado en bajas frecuencias, diferenciándolo de , empleado previamente para la señal glucémica cruda/residual.
+[280] Un aspecto central es que la diferencia entre clases se conserva a lo largo de la cadena dinámica: la separación entre grupos es prácticamente la misma en el forzamiento (Δβ ≈ 0,55) que en la glucosa integrada (Δβ ≈ 0,57), como ilustra la Figura 3.2.5. Dado que la integración desplaza el exponente absoluto de manera común a ambos grupos, esa diferencia no se origina en la estructura de integración sino en el propio forzamiento, lo que la señala como una propiedad intrínseca de la dinámica.
+[281] Cabe precisar que  no es la velocidad cruda de la glucosa, sino una transformación no lineal de ella: la compresión por tangente hiperbólica y el pesado por volatilidad enrojecen su espectro respecto del incremento. Por ello, su exponente () no debe identificarse directamente con el color del término estocástico de un eventual modelo dinámico; a tal efecto resulta más apropiado el color del incremento de la glucosa, , mientras que este indicador cumple su función propia de localizar los eventos de forzamiento.
+[282] La comparación con el exponente de Hurst estimado mediante DFA permite matizar la interpretación de persistencia del forzamiento metabólico. En ambos grupos, los sujetos DBT2 presentaron valores de Hurst mayores que NDBT2, compatibles con mayor memoria temporal o menor antipersistencia relativa. Por lo tanto, la mayor pendiente espectral observada en el forzamiento de los sujetos DBT2 se interpreta de manera coherente con un entorno glucémico más persistente, sin reducir la conclusión a una única técnica de análisis.
+[283] 
+[284] Detección de fenómeno del alba e ingestas mediante y energía wavelet 
+[285] La detección de eventos compatibles con fenómeno del alba e ingesta que se desarrolla en esta sección no constituye un algoritmo de diagnóstico clínico validado, ni pretende sustituir el registro directo de comidas, sueño o medicación. Su propósito es metodológico y prospectivo: localizar, sobre la dinámica derivada , los eventos de forzamiento metabólico que el modelo desarrollado en el capítulo siguiente tomará como blanco de intervención. La separación por escala temporal mediante la transformada wavelet —banda lenta de 3 a 8 h para el alba y banda rápida de 0,5 a 2 h para la ingesta— no cumple aquí una función meramente descriptiva: al distinguir el tipo de estructura temporal del forzamiento, anticipa también la clase de intervención fisiológica asociada, dado que una rampa lenta de madrugada y un pico posprandial rápido responden a palancas de regulación distintas.
+[286] Esta sección complementa la definición del indicador de forzamiento metabólico  y muestra su aplicación sobre un sujeto representativo. La señal observada primaria es la glucosa intersticial . La señal  se utiliza como una magnitud derivada, construida a partir de la dinámica de , que resume dirección e intensidad del cambio glucémico moduladas por el contexto energético. Por lo tanto,  no reemplaza a la glucosa ni se interpreta como una hormona o una tasa directa de producción hepática.
+[287] El sujeto a analizar dispone de 12 días completos de monitoreo continuo. Con un intervalo de muestreo de 15 min, cada día contiene 96 muestras y el registro completo contiene 1152 observaciones. En las figuras se muestran siempre las señales  y  sin suavizado. La tercera curva de cada figura corresponde a energía wavelet calculada sobre , no a una reconstrucción suavizada de la señal.
+[288] 3.2.7.1 Criterio matemático general 
+[289] El criterio de selección se formuló a partir de una idea simple: en una ventana temporal dada, una señal puede tener contribuciones positivas y negativas. Si la contribución positiva domina, el sistema presenta un sesgo acumulativo hacia el aumento de la glucosa o del forzamiento metabólico. Para evitar una interpretación basada únicamente en picos aislados, se comparan áreas acumuladas.
+[290] Sea  una señal discreta muestreada cada  min y sea  una ventana temporal. Se definen las partes positiva y negativa de la señal como
+[291]                                                     (3.14)
+[292] Las áreas acumuladas se aproximan por suma discreta:
+[293]                                                                             (3.15)
+[294]                                                                             (3.16)
+[295] A partir de estas áreas se definió el índice de predominio positivo:
+[296]                                                                             (3.17)
+[297] donde  es una constante pequeña incorporada solo para evitar división por cero cuando la señal no presenta variación en la ventana. En la práctica, cuando , el término  no modifica el valor del índice. Por construcción,
+[298] 
+[299] La interpretación matemática es directa. Si , entonces , por lo que domina el área positiva. Si , domina el área negativa. Si , ambas áreas se compensan. Además, el índice se relaciona con la razón de áreas
+[300]                                                                                       (3.18)
+[301] mediante la transformación
+[302]                                                                                                    (3.19)
+[303] Por lo tanto,  no introduce una magnitud nueva independiente, sino una forma normalizada y acotada de expresar el desbalance entre áreas positivas y negativas.
+[304] En este trabajo se emplean dos índices distintos. El primero se calcula sobre la glucosa observada, luego de referirla al valor inicial de la ventana:
+[305]                                                                                        (3.20)
+[306] El índice correspondiente se denota . Este valor indica si, durante la ventana, la glucosa permanece predominantemente por encima o por debajo del valor inicial. El segundo índice se calcula directamente sobre el forzamiento derivado:
+[307] 
+[308] El índice correspondiente se denota . Este valor indica si el forzamiento metabólico efectivo presenta predominio positivo o negativo.
+[309] La selección de eventos no se realiza con un único índice aislado. Se exige coherencia entre tres niveles: evidencia directa en , predominio dinámico en  y energía wavelet en la escala temporal esperada. Formalmente, para una ventana , se consideran las siguientes magnitudes:
+[310]                                                                                        (3.21)
+[311]                                                                             (3.22)
+[312]                                                                                         (3.23)
+[313]                                                                             (3.24)
+[314] donde  es la energía wavelet de  en la banda temporal considerada. El índice  determina el signo acumulado del evento, mientras que  actúa como criterio de escala temporal: no cambia el signo del evento, sino que verifica si la energía de  aparece en la banda compatible con el fenómeno analizado.
+[315] De esta manera, un evento se considera consistente cuando se cumple simultáneamente:
+[316] 
+[317] 
+[318] 
+[319] La condición  asegura que la glucosa observada aumenta. La condición  evita seleccionar aumentos puntuales que no representen predominio positivo durante la ventana. La condición  exige que el aumento se acompañe de un forzamiento metabólico derivado de signo positivo. Finalmente, la energía wavelet permite distinguir si el evento pertenece a una escala lenta, compatible con fenómeno del alba, o a una escala rápida, compatible con ingesta.
+[320] En términos de clasificación operativa, se utilizó el siguiente criterio:
+[321] Clasificación
+[322] Criterio matemático
+[323] Fuerte
+[324] ΔG > 0, I_G > 0, I_S > 0 y energía wavelet clara en la banda esperada.
+[325] Moderada
+[326] ΔG > 0 y predominio positivo parcial en G(t) o S(t), con energía wavelet compatible.
+[327] Posible
+[328] ΔG > 0, pero con predominio débil o ambiguo en alguno de los índices.
+[329] No compatible
+[330] ΔG ≤ 0 o predominio negativo simultáneo en G(t) y S(t).
+[331] 
+[332] Este criterio es deliberadamente conservador. Su objetivo no es confirmar clínicamente una ingesta o un fenómeno hormonal, sino identificar ventanas compatibles con una dinámica observada en la glucosa y respaldada por el comportamiento del indicador .
+[333] 3.2.7.2 Fenómeno del alba 
+[334] El fenómeno del alba se describe como un incremento espontáneo de glucosa durante la madrugada o la mañana temprana, no precedido por hipoglucemia nocturna. La literatura clínica ubica el incremento hormonal asociado aproximadamente entre las 03:00 y las 08:00 h, con participación de hormonas contrarreguladoras como cortisol, hormona de crecimiento y glucagón (O’Neal et al., 2023; Cleveland Clinic, 2022). Estudios fisiológicos clásicos describen que el proceso puede comenzar alrededor de las 03:30 h, asociado a cambios nocturnos en producción y utilización de glucosa y a mecanismos hormonales contrarreguladores (Campbell et al., 1985). En este trabajo se tomó la ventana 03:00-08:00 h como intervalo de búsqueda.
+[335] Para el día , la ventana analizada fue
+[336]                                                     (3.25)
+[337] El incremento directo de glucosa se calculó como
+[338]                                                                             (3.26)
+[339] En cada día, esta diferencia se evaluó dentro de la ventana correspondiente. Para calcular áreas en glucosa se tomó como referencia el valor de glucosa a las 03:00 h:
+[340] 
+[341] Para el forzamiento derivado se mantuvo la referencia natural en cero:
+[342] 
+[343] Con estas dos señales se obtuvieron los índices  e . Un evento se consideró compatible con fenómeno del alba cuando el aumento de  entre 03:00 y 08:00 h estuvo acompañado por predominio positivo de .
+[344] La banda wavelet empleada para el alba no se tomó como un valor dado de antemano, sino como una elección operacional basada en la escala temporal del fenómeno. El alba no se presenta como un pico instantáneo, sino como una variación progresiva de varias horas. Por eso se buscó energía de  en una banda lenta. La transformada wavelet continua se escribió como
+[345]                                                                 (3.27)
+[346] Aquí  representa el período asociado a la escala y  representa el núcleo wavelet de Morlet trasladado y dilatado. La wavelet permite localizar energía simultáneamente en tiempo y escala, lo cual resulta apropiado para señales fisiológicas no estacionarias (Torrence & Compo, 1998; Addison, 2005). Para el fenómeno del alba se utilizó la banda lenta de 3 a 8 h:
+[347]                                                                                        (3.28)
+[348] por lo que
+[349]                                                                (3.29)
+[350] Esta banda no afirma que el fenómeno del alba dure exactamente entre 3 y 8 h. Indica que, para este análisis, se consideran relevantes las estructuras de  que tienen escala multihora. Así, la identificación del alba no depende sólo de que exista aumento de glucosa entre 03:00 y 08:00 h, sino de que ese aumento esté acompañado por predominio positivo de  y energía lenta en el mismo indicador.
+[351] La Figura 3.2.6.1 muestra los 12 días continuos de un sujeto. En el panel superior se observa , en el panel medio  y en el panel inferior la energía wavelet lenta de . Las franjas sombreadas corresponden a la ventana 03:00-08:00 h de cada día. A diferencia de la versión exploratoria, cada franja está rotulada con su clasificación operativa. En este sujeto se identificaron 4 días con criterio fuerte, 6 moderados, 1 posible y 1 no compatible. Los días más claros fueron 3, 4, 8 y 9, con incrementos de , ,  y 120 , respectivamente. El día  funcionó como contraejemplo, con  e .
+[352] 
+[353] Figura 3.2.7.2. Fenómeno del alba de un sujeto.
+[354] Para que la clasificación del alba no quede reducida a una regla algebraica abstracta, se incorporaron ejemplos de sujetos diferentes. La Figura 3.2.6.2 mantiene la misma estructura visual: glucosa observada , indicador derivado  y energía wavelet lenta de . La zona sombreada indica la ventana evaluada. El caso fuerte muestra aumento sostenido de glucosa,  e  positivos y energía lenta acompañante. El caso moderado conserva aumento de glucosa y escala compatible, pero el predominio de  es menos uniforme. El caso posible presenta aumento glucémico con evidencia dinámica incompleta. El caso no compatible muestra dirección contraria o predominio negativo, por lo que se descarta como evento de alba.
+[355] 
+[356] Figura 3.2.7.2. Clasificaciones del fenómeno del alba.
+[357] 3.2.7.3 Eventos compatibles con ingesta 
+[358] Las ingestas producen variaciones más rápidas que el fenómeno del alba. Mientras que el alba se interpreta como una rampa lenta de varias horas, la respuesta posprandial se evalúa habitualmente entre 1 y 2 h después del inicio de una comida, intervalo que aproxima el pico posprandial en pacientes con diabetes (American Diabetes Association, 2001; American Diabetes Association, n.d.). Por esa razón, para detectar eventos compatibles con ingesta se aplicó la misma metodología sobre , pero usando una banda rápida.
+[359] La visualización de ingestas se realizó sobre los 12 días continuos, para preservar el contexto temporal completo. Sin embargo, el barrido operativo de ventanas candidatas se restringió al intervalo diurno y vespertino, con inicios entre 08:00 y 21:30 h. La ventana 03:00-08:00 h quedó reservada para el fenómeno del alba, a fin de no confundir aumentos lentos de madrugada con eventos compatibles con ingesta. Para una ventana candidata , el incremento máximo de glucosa se definió como
+[360]                                                                             (3.30)
+[361] Dentro de cada ventana candidata se calcularon también las áreas positiva y negativa de , junto con . Un evento compatible con ingesta debe mostrar aumento de glucosa, predominio positivo de  y energía wavelet rápida en . Esta combinación permite diferenciar una elevación posprandial probable de una oscilación lenta o de un desplazamiento basal.
+[362] La banda rápida tampoco es un parámetro fisiológico universal. Se eligió porque una ingesta genera una respuesta de menor duración que el alba y porque la resolución del CGM, de 15 min, permite resolver variaciones sub-horarias y de pocas horas. En este trabajo se tomó
+[363]                                                                                         (3.31)
+[364] por lo que
+[365]                                                     (3.32)
+[366] La cota inferior de 0.5 h evita que el criterio responda sólo a fluctuaciones de una o dos muestras aisladas, mientras que la cota superior de 2 h conserva la escala esperada para una respuesta posprandial rápida. Por esta razón, un evento compatible con ingesta debe mostrar simultáneamente incremento de , predominio positivo de  y energía wavelet en la banda rápida.
+[367] 3.2.7.4 Agrupamientos de ventanas candidatas no solapadas
+[368] Como la búsqueda de eventos compatibles con ingesta se realiza mediante un barrido temporal, una misma elevación glucémica puede ser detectada por varias ventanas consecutivas. Esto ocurre porque las ventanas de análisis se desplazan muestra a muestra y, por lo tanto, dos ventanas vecinas comparten gran parte de sus datos. Para evitar contar varias veces la misma excursión glucémica, se aplicó un procedimiento de selección de ventanas no solapadas.
+[369] Sea  la duración de cada ventana candidata y sea  el paso de desplazamiento, equivalente al intervalo de muestreo del CGM. Para cada inicio , se definió la ventana
+[370]                                                                                         (3.33)
+[371] En cada  se calculó el incremento máximo de glucosa respecto del inicio, los índices de predominio  e , y la energía wavelet rápida de . Sólo se conservaron como candidatas las ventanas con aumento glucémico mínimo de ,
+[372] 
+[373] Luego, cada ventana recibió un puntaje de compatibilidad posprandial
+[374]                                                    (3.34)
+[375]                             (3.35)
+[376] El puntaje definido en (3.35) es un índice operacional de priorización, no un clasificador clínicamente calibrado: dado que no se dispone de un registro horario de comidas, su función no es afirmar que ocurrió una ingesta, sino ordenar las ventanas candidatas parcialmente solapadas y conservar la que presenta mayor coherencia entre el ascenso glucémico, el predominio positivo del forzamiento y la energía wavelet rápida. Su forma multiplicativa responde a una lógica conjuntiva: el puntaje solo alcanza valores altos cuando los cuatro factores están presentes a la vez, de modo que la ausencia de cualquiera de ellos lo colapsa hacia cero. El uso de las partes positivas e  definidas en (3.34) asegura que un índice negativo —compatible con un descenso o una recuperación, no con una ingesta— no contribuya como si fuese positivo. Las constantes cumplen funciones de escala y regularización: el factor  normaliza respecto de la amplitud característica de una excursión posprandial (del orden de 40 mg/dL), de manera que una subida de esa magnitud aporte un factor cercano a la unidad y el término de glucosa no domine numéricamente a los demás; los reguladores  y , pequeños y positivos, evitan que el producto se anule cuando una de las asimetrías es débil pero el evento es real; y el tope  sobre  hace que la energía wavelet actúe como refuerzo y no como criterio único ni dominante. En consecuencia, es adimensional por construcción —el factor  absorbe las unidades de — y de carácter estrictamente comparativo: sirve para ordenar y seleccionar ventanas entre sí, no para asignar un significado absoluto a su valor. Por esta razón, los eventos retenidos se designan a lo largo del capítulo como compatibles con ingesta, y no como ingestas confirmadas.
+[377] Operativamente, el puntaje se emplea dentro de un procedimiento de selección por exclusión: se descartan primero las ventanas con ascenso menor (), por corresponder a oscilaciones menores o ruido fisiológico; sobre las restantes se calcula ; se ordenan de mayor a menor y se acepta la de mayor puntaje; y luego se aceptan nuevas ventanas únicamente si no se solapan con las ya retenidas. De este modo, entre varias ventanas consecutivas que describen una misma excursión, se conserva la de mayor coherencia y se evita contabilizar el mismo evento más de una vez.
+[378] Este puntaje no reemplaza a los índices, sino que se usa para ordenar ventanas candidatas que describen casi el mismo episodio. El término  pondera la magnitud del ascenso glucémico,  e  ponderan el predominio positivo en glucosa y forzamiento, y  pondera la presencia de energía rápida en .
+[379] Para obtener eventos no solapados, las ventanas de cada día se ordenaron de mayor a menor . Se seleccionó primero la ventana con mayor puntaje y, posteriormente, sólo se aceptó una nueva ventana si no intersectaba temporalmente a ninguna de las ya seleccionadas. Es decir, dos ventanas  e  se consideraron separadas si
+[380] 
+[381] Si dos ventanas se solapaban,
+[382] 
+[383] se interpretaron como descripciones alternativas de la misma excursión glucémica y se conservó únicamente la de mayor puntaje. Finalmente, se descartaron ventanas con , por considerarse evidencia dinámica insuficiente.
+[384] Este criterio tiene una consecuencia importante. Si el sujeto realiza dos ingestas muy cercanas en el tiempo, por ejemplo una merienda seguida de una cena, el algoritmo las separa sólo si generan ventanas no solapadas y ambas cumplen los criterios de incremento glucémico, predominio positivo y energía rápida. Si las respuestas se superponen dentro de una misma ventana de 2.5 h, el procedimiento las agrupa como un único evento compuesto. Esta decisión es conservadora: reduce el riesgo de sobrecontar una misma respuesta posprandial, aunque puede subestimar ingestas muy próximas cuando no existe un registro manual de comidas.
+[385] La clasificación final de cada ventana seleccionada se realizó después de este agrupamiento. Una ventana fue rotulada como fuerte cuando cumplió  mg/dL, ,  y . Se rotuló como moderada cuando cumplió  mg/dL,  e . Se rotuló como posible cuando cumplió  mg/dL,  e , pero sin alcanzar los criterios anteriores. Las restantes ventanas se consideraron no compatibles.
+[386] La Figura 3.2.6.3 muestra las ventanas compatibles con ingesta detectadas en los 12 días continuos de un sujeto. Cada franja sombreada corresponde a una ventana no solapada y está rotulada con su clasificación operativa. Los intervalos no sombreados no alcanzaron los criterios simultáneos de aumento de glucosa, predominio positivo de  y energía wavelet rápida, por lo que se consideran no compatibles con ingesta bajo este procedimiento. En este sujeto se detectaron 29 ventanas no solapadas compatibles con ingesta: 8 fuertes, 9 moderadas y 12 posibles. Las ventanas fuertes presentaron un incremento máximo medio de  y un índice medio . Las ventanas moderadas presentaron un incremento máximo medio de  y un índice medio . Estos valores indican que los eventos de mayor magnitud glucémica se acompañaron, en general, de predominio positivo del forzamiento derivado.
+[387] 
+[388] Figura 3.2.7.4.1. Eventos compatibles con ingesta de un sujeto
+[389] La Figura 3.2.7.4 muestra ejemplos de sujetos diferentes para cada categoría de ingesta. En el caso fuerte se observa una respuesta rápida y sostenida, con incremento glucémico elevado y predominio positivo de . En el caso moderado, el aumento de glucosa es claro, pero el predominio positivo de  es parcial. En el caso posible, existe aumento de glucosa, aunque el índice  es bajo o la forma temporal es más ambigua. El caso no compatible funciona como contraejemplo: no hay incremento positivo desde el inicio de la ventana o el signo acumulado contradice la hipótesis de ingesta.
+[390] 
+[391] Figura 3.2.7.4.2 Clasificaciones de eventos compatibles con ingesta.
+[392] 3.2.7.5 Interpretación metodológica
+[393] El criterio propuesto mantiene separadas las funciones de cada señal. La glucosa  aporta la evidencia observada. El indicador  aporta una descripción dinámica derivada, orientada a determinar si el aumento observado se acompaña de un predominio de forzamiento positivo. La energía wavelet aplicada sobre  permite distinguir la escala temporal del evento: 3-8 h para fenómeno del alba y 0.5-2 h para ingestas.
+[394] La hora define dónde buscar; el índice  define el predominio positivo o negativo; y la banda wavelet define la escala temporal del forzamiento asociado. Por esta razón, los resultados se expresan como eventos compatibles con fenómeno del alba o compatibles con ingesta. Esta formulación es prudente porque no se dispone de registro manual de comidas, sueño, medicación ni mediciones hormonales simultáneas.
+[395] En síntesis, los eventos identificados como compatibles con alba e ingesta no se interpretan como un fin en sí mismo, sino como los puntos sobre los cuales operará el modelo del capítulo final. En ese marco, atenuar localmente el forzamiento dentro de las ventanas detectadas representa el efecto que tendría una intervención orientada a aplacar la excursión correspondiente. La asociación de esa atenuación con estrategias concretas —ajustes de dieta, medicación o actividad física— debe entenderse en sentido condicional e interpretativo: el modelo evalúa el efecto de modular el forzamiento de un evento previamente detectado, y no afirma haber registrado la intervención real ni propone un protocolo clínico. De este modo, la caracterización dinámica de este capítulo provee los objetos —eventos de forzamiento localizados por escala— sobre los que el modelado posterior cuantificará escenarios de intervención.
+[396] Exponente de Lyapunov y tiempo de Lyapunov
+[397] El exponente de Lyapunov cuantifica la tasa media exponencial con la que divergen (o convergen) dos trayectorias inicialmente cercanas en el espacio de fases. En términos geométricos, si se considera la evolución temporal de una esfera infinitesimal de condiciones iniciales, el flujo la deforma en un elipsoide; los exponentes de Lyapunov se definen a partir de las tasas de crecimiento (o contracción) de los ejes principales de ese elipsoide en el límite de tiempo largo. En particular, el -ésimo exponente puede expresarse como un límite del tipo
+[398]                                                                                  (3.36)
+[399] donde  es la longitud del eje principal correspondiente al tiempo t o a la condición inicial. (Wolf et al., 1985).
+[400] En la práctica, la atención suele centrarse en el máximo exponente de Lyapunov . Un valor positivo de  indica sensibilidad a condiciones iniciales, es decir, una separación típica entre trayectorias del tipo  en promedio, lo cual es suficiente para caracterizar comportamiento caótico en sistemas deterministas (Wolf et al., 1985). En aplicaciones sobre series temporales fisiológicas (por ejemplo, glucosa intersticial), esta interpretación se utiliza como criterio operativo:  sugiere dinámica no lineal con inestabilidad local en al menos una dirección del espacio de fases reconstruido (Amadio et al., 2022).
+[401] Dado que en datos experimentales no se dispone de las ecuaciones del sistema ni del espacio tangente, el máximo exponente de Lyapunov  se estima a partir de una reconstrucción del espacio de fases mediante coordenadas retardadas. En el enfoque de Rosenstein, la estimación se basa en identificar, para cada punto de la trayectoria reconstruida, un vecino cercano suficientemente separado en el tiempo (para evitar correlación temporal), y analizar cómo crece en promedio la distancia entre ambos al avanzar pasos. En el régimen local, el crecimiento esperado satisface , por lo que  se obtiene como la pendiente del ajuste lineal de  respecto del tiempo. Este procedimiento es especialmente útil en series relativamente cortas y con ruido moderado, porque promedia la divergencia sobre muchos pares de vecinos en lugar de seguir una única separación (Rosenstein et al., 1993). 
+[402] Este tipo de algoritmos permite estimar exponentes no negativos a partir de datos finitos, aunque su desempeño depende de la calidad de los datos, la presencia de ruido, la elección de parámetros de reconstrucción (dimensión de embedding y retardo) y la disponibilidad de vecinos suficientemente cercanos (Wolf et al., 1985).
+[403] Análisis de los exponentes de Lyapunov estimados con nolds
+[404] Con el objetivo de cuantificar la inestabilidad local y el horizonte de predictibilidad de las señales de glucosa, se estimó el máximo exponente de Lyapunov  a partir de cada serie temporal utilizando el estimador tipo Rosenstein provisto por la función lyap_r de la librería nolds.  En todos los casos, el exponente se reporta en  (muestreo cada 15 min, ) y el tiempo de Lyapunov se definió como  en horas.
+[405] En la comparación entre condiciones reales, DBT2 presenta un  medio mayor que NDBT2, lo que implica un horizonte de predictibilidad más corto (menor ). En términos prácticos, la dinámica de DBT2 muestra mayor divergencia local promedio entre trayectorias cercanas que la de NDBT2 bajo el mismo protocolo de estimación.
+[406] Condición
+[407] 
+[408] 
+[409] 
+[410] DBT2
+[411] 20
+[412] 
+[413] 
+[414] NDBT2
+[415] 20
+[416] 
+[417] 
+[418] Tabla 3.3.1 Exponente y tiempo de Lyapunov, media y desvío según grupo de estudio
+[419] El plano HxC
+[420] El plano entropía–complejidad  constituye una herramienta informacional particularmente adecuada para caracterizar series temporales biomédicas, ya que permite distinguir entre aleatoriedad, regularidad y organización dinámica no trivial mediante una representación geométrica en el espacio ). En esta tesis, dicho plano se utiliza como descriptor robusto de la dinámica subyacente en señales de glucosa obtenidas por monitoreo continuo (CGM), apoyándose en la simbolización ordinal propuesta por Bandt y Pompe y en medidas de complejidad estadística basadas en divergencias de tipo Jensen–Shannon (Bandt & Pompe, 2002; Lamberti et al., 2004; Martin et al., 2006; Amadio et al., 2022).
+[421] La entropía de Shannon
+[422] El punto de partida del enfoque es transformar la serie temporal real en una distribución de probabilidad discreta P definida sobre patrones ordinales. Para ello se fija una dimensión ordinal D_BP (longitud del patrón) y un retardo ordinal . Con esos parámetros se construyen vectores embebidos de la forma
+[423] ,                                                    (3.37)
+[424] y a cada vector se le asocia el patrón ordinal que describe el orden relativo de sus componentes (es decir, la permutación que reordena esos valores de menor a mayor). La sucesión de patrones obtenida al recorrer la serie permite estimar la probabilidad empírica de cada permutación posible, dando lugar a la distribución  (Bandt & Pompe, 2002).
+[425] Esta construcción posee ventajas relevantes para señales experimentales: al depender del orden relativo, resulta invariante ante transformaciones monótonas (por ejemplo, cambios de escala) y tiende a ser más estable frente a ruido instrumental moderado que métodos basados directamente en amplitudes (Bandt & Pompe, 2002). En el caso particular de esta tesis, cuando se adopta , el espacio de estados simbólico tiene cardinalidad . La Figura 3.1 ilustra esos seis patrones y su interpretación como orden relativo de la terna base para estimar la distribución de probabilidades P.
+[426] 
+[427] Figura 3.1. Patrones ordinales posibles para D_BP=3. 
+[428] 
+[429] A partir de  se define la entropía de Shannon
+[430]                                            (3.38)denominada entropía de permutación de Shannon cuando  proviene de patrones ordinales. Con el fin de hacer comparables series y configuraciones distintas, se emplea su normalización por el máximo posible , obteniendo
+[431]                                                                                         (3.39)
+[432] En términos interpretativos, valores cercanos a  indican que la dinámica produce un conjunto reducido de patrones (estructura altamente regular), mientras que valores cercanos a  reflejan una distribución aproximadamente uniforme de patrones, compatible con comportamiento fuertemente aleatorio (Bandt & Pompe, 2002; Amadio et al., 2022).
+[433] Sin embargo, la entropía por sí sola no basta para identificar organización no trivial: tanto un proceso puramente estocástico como una dinámica determinista caótica pueden exhibir entropías altas o intermedias dependiendo de escalas y parámetros. Por esta razón se introduce una segunda coordenada que cuantifica “estructura” más allá del desorden global (Martin et al., 2006).
+[434] La complejidad estadística C
+[435] La complejidad estadística utilizada en el plano se construye combinando (i) el contenido de incertidumbre medido por y (ii) un término de desequilibrio que mide cuán lejos está  de la distribución equiprobable . Una formulación ampliamente utilizada y adoptada en el marco de esta tesis es
+[436]                                                                                  (3.40)
+[437] donde es la divergencia de Jensen–Shannon y es una constante de normalización que acota la medida en (Lamberti et al., 2004; Martin et al., 2006; Amadio et al., 2022). La divergencia de Jensen–Shannon se expresa como
+[438]                                                                     (3.41)
+[439] Este diseño tiene una consecuencia conceptual clave:  tiende a ser pequeña tanto en el extremo de máximo orden (cuando un patrón domina y ) como en el extremo de máximo desorden (cuando  y el desequilibrio se anula), y alcanza valores mayores en regímenes intermedios donde coexisten variabilidad y correlaciones estructuradas (Martin et al., 2006). En otras palabras,  apunta a capturar organización no trivial: no “orden perfecto”, sino estructura emergente.
+[440] Análisis del plano  por sujeto (NDBT2 vs DBT2)
+[441] En la Figura 3.2.3 se representa, para cada sujeto, su ubicación en el plano entropía-complejidad H×C, calculado a partir de patrones ordinales (Bandt-Pompe) con D_BP=3 y τ_BP=1 muestra. Los sujetos NDBT2 y DBT2 se muestran como nubes de puntos sobre las curvas límite C_min y C_max, que acotan la región accesible del plano para D_BP=3. La Figura 3.2.3A presenta la vista global, mientras que la Figura 3.2.3B amplía la zona de interés (H∈[0,7; 1], C≤0,2) e incluye los centroides de ambos grupos.
+[442] 
+[443] Figura 3.2.3. Plano H×C por sujeto (Bandt-Pompe, ).
+[444] Visualmente, ambos grupos se concentran en el sector de alta entropía (), consistente con señales fisiológicas con variabilidad relevante. Sin embargo, se observa un desplazamiento sistemático entre grupos: los sujetos NDBT2 se agrupan hacia valores más altos de  y más bajos de , mientras que los sujetos DBT2 se desplazan hacia menor  y mayor . Este corrimiento queda sintetizado por los centroides (Figura 3.2.3.B), que evidencian separación.
+[445] La comparación cuantitativa confirma esta tendencia. Para DBT2 () se obtuvo  y , mientras que para NDBT2 () se obtuvo  y . En términos de diferencias medias, DBT2 presenta  y  respecto de NDBT2. Además, la dispersión es marcadamente mayor en DBT2 (desvíos estándar más altos), lo cual sugiere heterogeneidad en la dinámica glucémica de los sujetos con DBT2, coherente con distintos niveles de control metabólico y perfiles de variabilidad.
+[446] Una entropía de permutación menor en DBT2 indica que la distribución de patrones ordinales se aleja de la equiprobabilidad en comparación con NDBT2, es decir, aparecen patrones preferenciales con mayor frecuencia. A su vez, la complejidad estadística mayor implica que ese alejamiento no corresponde a una simple regularidad trivial, sino a correlaciones o dinámica estructurada capturada por la divergencia de Jensen-Shannon respecto del caso equiprobable. En conjunto, el patrón H↓, C↑ observado en DBT2 es consistente con una reorganización de la dinámica de la glucosa: menor variedad ordinal efectiva y mayor estructura temporal asociada a la regulación alterada.
+[447] Validación del indicador basado en OPTM según Amadio et al. (2023)
+[448] En un estudio piloto previo se propuso un conjunto de herramientas matemáticas e informacionales para la clasificación de señales de glucosa, basadas en la simbolización por patrones ordinales (OPS, Bandt-Pompe) y en matrices de transición entre patrones (OPTM), incluyendo el tratamiento explícito de valores repetidos. En particular, el trabajo muestra que la representación en el plano entropía-complejidad H×C y las métricas derivadas de la OPTM permiten discriminar grupos con y sin DBT2, y propone un índice compuesto ν que integra cuatro clasificadores (Amadio et al., 2023). En este capítulo se adopta como indicador escalar la norma del vector estacionario de la OPTM construida con tratamiento secuencial de empates, que coincide con uno de esos clasificadores (Amadio et al., 2023, ec. 15) y no con el índice compuesto ν (ec. 17). El vector estacionario  se define como el autovector izquierdo de autovalor 1 de la matriz de transición , único por el teorema de Perron-Frobenius para matrices estocásticas irreducibles:
+[449]                                                                                                     (3.42)
+[450] con la normalización . Se reutilizan los umbrales reportados en ese trabajo: NDBT2 si ; DBT2 si ; y zona dudosa en el intervalo intermedio. Se emplea únicamente esta norma —y no el índice compuesto ν— por su simplicidad y porque resulta suficiente para separar los grupos en el conjunto analizado. Bajo esta regla, el umbral sobre reproduce las etiquetas de diagnóstico clínico salvo en dos casos que caen en la zona dudosa ).
+[451] 
+[452] Sujeto
+[453] Stat_MS (NDBT2)
+[454] Diagnóstico (NDBT2)
+[455] Stat_MS (DBT2)
+[456] Diagnóstico (DBT2)
+[457] 1
+[458] 0.4991
+[459] Dudoso
+[460] 0.5210
+[461] Diabetes
+[462] 2
+[463] 0.4772
+[464] Sano
+[465] 0.5175
+[466] Diabetes
+[467] 3
+[468] 0.4787
+[469] Sano
+[470] 0.5162
+[471] Diabetes
+[472] 4
+[473] 0.4836
+[474] Sano
+[475] 0.5167
+[476] Diabetes
+[477] 5
+[478] 0.4816
+[479] Sano
+[480] 0.5198
+[481] Diabetes
+[482] 6
+[483] 0.4794
+[484] Sano
+[485] 0.5174
+[486] Diabetes
+[487] 7
+[488] 0.4728
+[489] Sano
+[490] 0.5183
+[491] Diabetes
+[492] 8
+[493] 0.4784
+[494] Sano
+[495] 0.5149
+[496] Diabetes
+[497] 9
+[498] 0.4757
+[499] Sano
+[500] 0.5158
+[501] Diabetes
+[502] 10
+[503] 0.4667
+[504] Sano
+[505] 0.4992
+[506] Dudoso
+[507] 11
+[508] 0.4779
+[509] Sano
+[510] 0.5248
+[511] Diabetes
+[512] 12
+[513] 0.4799
+[514] Sano
+[515] 0.5173
+[516] Diabetes
+[517] 13
+[518] 0.4734
+[519] Sano
+[520] 0.5209
+[521] Diabetes
+[522] 14
+[523] 0.4784
+[524] Sano
+[525] 0.5058
+[526] Diabetes
+[527] 15
+[528] 0.4695
+[529] Sano
+[530] 0.5131
+[531] Diabetes
+[532] 16
+[533] 0.4798
+[534] Sano
+[535] 0.5232
+[536] Diabetes
+[537] 17
+[538] 0.4887
+[539] Sano
+[540] 0.5170
+[541] Diabetes
+[542] 18
+[543] 0.4626
+[544] Sano
+[545] 0.5151
+[546] Diabetes
+[547] 19
+[548] 0.4813
+[549] Sano
+[550] 0.5175
+[551] Diabetes
+[552] Para hacer explícito el procedimiento, la OPTM se construye contabilizando las transiciones entre patrones ordinales consecutivos. Cada entrada de la matriz representa la frecuencia con la que un símbolo ordinal es seguido por otro, de modo que la matriz no describe sólo qué patrones aparecen, sino también cómo se encadenan temporalmente. A partir de esa matriz se obtiene el vector estacionario , que resume la distribución de largo plazo inducida por las transiciones. El uso de la norma como indicador escalar permite comparar cada señal con las regiones reportadas en el estudio piloto: NDBT2, DBT2 y zona intermedia. En este capítulo, el indicador se utiliza como complemento del plano H×C, ya que incorpora información secuencial que la distribución marginal de patrones no retiene por completo.
+[553] Reconstrucción del espacio de fase mediante coordenadas retrasadas
+[554] Sea  la señal de glucosa muestreada uniformemente (en este caso, cada ), y sea su representación discreta. Una forma estándar de aproximar la dinámica subyacente cuando solo se observa una variable escalar consiste en reconstruir un espacio de estados equivalente a partir de coordenadas retrasadas (delay embedding). Para evitar confusión con la simbolización ordinal de Bandt-Pompe, en esta sección se denotan como la dimensión de incrustación geométrica y  el retraso temporal de reconstrucción, medido en número de muestras. El vector estado reconstruido se define como:
+[555] 
+[556] Bajo hipótesis generales de suavidad y genericidad, el teorema de Takens establece que, para suficientemente grande, el mapeo de retraso puede proporcionar una incrustación (embedding) que preserva la estructura topológica del atractor del sistema dinámico subyacente, habilitando el análisis geométrico a partir de una única medición escalar (Takens, 1981; Sauer et al., 1991). Esta reconstrucción se emplea aquí con un propósito metodológico: transformar la serie temporal en un objeto geométrico (nube de puntos o trayectoria en ) cuyo análisis permite comparar sujetos, ventanas temporales y, más adelante, evaluar si el aumento de datos conserva rasgos dinámicos esenciales.
+[557] Selección de los parámetros de incrustación  y 
+[558] La calidad de la reconstrucción depende críticamente de la elección del retraso y de la dimensión de incrustación . Un valor de  demasiado pequeño produce vectores embebidos cuyas componentes están fuertemente correlacionadas. En particular, para el plano  contra  es cercano al retrato de fase G contra , ya que ; por ello, la trayectoria reconstruida tiende a concentrarse alrededor de la diagonal y no despliega adecuadamente la estructura de recurrencia del atractor. Un valor excesivamente grande, en cambio, diluye la estructura dinámica al independizar demasiado las coordenadas.
+[559] El criterio clásico de Fraser y Swinney (1986) prescribe adoptar el primer mínimo local de la información mutua promedio (AMI). Sin embargo, en señales fisiológicas suaves como la glucosa intersticial, la AMI puede presentar un decaimiento monótono sin mínimo local definido. Por ese motivo, se adoptó un criterio alternativo basado en la estabilización de la primera diferencia de la AMI normalizada. La Figura 3.3.1(A) muestra la AMI normalizada, calculada con bins adaptativos por cuantiles, en función de  para un sujeto representativo de cada grupo; la Figura 3.3.1(B) presenta la tasa de pérdida de información correspondiente. En ambos grupos, la derivada discreta se estabiliza a partir de  muestras (60 min), indicando que retardos mayores no aportan información nueva significativa a la coordenada embebida. Este criterio es equivalente a identificar el punto de máxima curvatura del decaimiento de la AMI.
+[560] 
+[561] Figura 3.3.1. Selección de  y  para la reconstrucción del espacio de fase.
+[562] Para la dimensión de incrustación se aplicó el método de falsos vecinos más cercanos (FNN). Para cada dimensión candidata se calcula la proporción de puntos cuyo vecino más cercano en deja de serlo al pasar a ; esto indica que la cercanía observada era un artefacto de la proyección y no una vecindad genuina (Kennel et al., 1992). La Figura 3.3.1(C) muestra el porcentaje de FNN en función de , evaluado con . En ambos sujetos la proporción desciende por debajo del umbral del 5 % en , estabilizándose en . Se adoptó  como dimensión de trabajo, coherente con la dimensión utilizada en la estimación de los exponentes de Lyapunov y diferenciada de , usada para los patrones ordinales de Bandt-Pompe.
+[563] Las Figuras 3.3.2(A) y 3.3.2(B) presentan el espacio de fase bidimensional reconstruido contra , con y 2 como proyección visual del embedding, para un sujeto representativo de cada grupo. La línea punteada indica la condición es decir, ausencia de cambio neto en el intervalo . Los puntos alejados de esta diagonal corresponden a transiciones rápidas.
+[564] En el sujeto NDBT2 (Figura 3.3.2A), la nube de puntos se concentra en un dominio compacto de aproximadamente en ambos ejes, con la mayoría de los estados agrupados en torno a la diagonal, lo que refleja una dinámica acotada y con variaciones moderadas. En el sujeto DBT2 (Figura 3.3.2B), el atractor se expande considerablemente, alcanzando valores superiores a , y exhibe una dispersión marcadamente mayor fuera de la diagonal. Esta expansión geométrica es consistente con la mayor inestabilidad local cuantificada por el exponente de Lyapunov positivo más alto en el grupo DBT2, así como con la menor entropía de permutación y mayor complejidad estadística observadas en  estados con transiciones más abruptas, mientras que el sujeto sano permanece confinado en una región restringida del atractor.
+[565] 
+[566] Figura 3.3.2. Espacio de fase reconstruido 4 muestras (60 min).
+[567] Esta representación complementa los descriptores escalares previos al ofrecer una imagen global de la estructura dinámica. En el capítulo siguiente se retomará como referencia para evaluar si las series sintéticas generadas por el modelo de Langevin preservan la morfología del atractor original.
+[568] 
+[569] 
+[570] 
+[571] 
+[572] 
+[573] 
+[574] 
+[575] 
+[576] 
+[577] 
+[578] Bibliografía
+[579] 1. Abbott Diabetes Care. (2018). FreeStyle Libre 14 day system: Cautions and limitations (ART38711-001 Rev A) [PDF]. https://freestyleserver.com/Payloads/IFU/2018/ART38711-001_rev-A.pdf
+[580] 2. Abbott Diabetes Care. (n.d.-a). Important safety information [Web page]. https://www.freestyleprovider.abbott/us-en/safety-information.html
+[581] 3. Abbott. (2024a, October 30). Abbott’s FreeStyle Libre® 2 and 3 systems can now be worn during common imaging procedures, such as X-rays, CT scans and MRIs. Abbott MediaRoom. https://abbott.mediaroom.com/press-releases?item=124675
+[582] 4. Addison, P. S. (2005). Wavelet transforms and the ECG: A review. Physiological Measurement, 26(5), R155-R199. https://doi.org/10.1088/0967-3334/26/5/R01
+[583] 5. Ahmed, N., Natarajan, T., & Rao, K. R. (1974). Discrete Cosine Transform. IEEE Transactions on Computers, C-23(1), 90-93. https://doi.org/10.1109/T-C.1974.223784
+[584] 6. Amadio, A., Rey, A., Legnani, W., García Blesa, M., Bonini, C., & Otero, D. (2023). Mathematical and informational tools for classifying blood glucose signals: A pilot study. Physica A: Statistical Mechanics and its Applications, 626, 129071. https://doi.org/10.1016/j.physa.2023.129071
+[585] 7. Amadio, A., Rey, A., Otero, D., Bonini, C., García Blesa, H., & Legnani, W. (2022). A preliminary study characterizing the adult diabetes using the entropy complexity plane. Revista Argentina de Bioingeniería, XXIII Congreso Argentino de Bioingeniería y XII Jornadas de Ingeniería Clínica.
+[586] 8. American Diabetes Association. (2001). Postprandial blood glucose. Diabetes Care, 24(4), 775-778. https://doi.org/10.2337/diacare.24.4.775
+[587] 9. American Diabetes Association. (n.d.). Checking your blood glucose. Retrieved June 18, 2026, from https://diabetes.org/living-with-diabetes/treatment-care/checking-your-blood-sugar
+[588] 10. Association of Diabetes Care & Education Specialists. (2020, August 3). FreeStyle Libre 2: A new iCGM device [PDF]. source/dana-files/adc-23842v3-revised-august-3-2020cd070ee4-83cd-472c-a990-892684a26df3.pdfhttps://www.adces.org/docs/default-
+[589] 11. Association of Diabetes Care & Education Specialists. (2024, April 17). Continuous glucose monitoring and interfering substances [PDF]. https://diabetesed.net/wp-content/uploads/2024/04/CGM-Interferring-Substances.pdf
+[590] 12. Bandt, C., & Pompe, B. (2002). Permutation entropy: A natural complexity measure for time series. Physical Review Letters, 88(17), 174102. https://doi.org/10.1103/PhysRevLett.88.174102
+[591] 13. Battelino, T., Danne, T., Bergenstal, R. M., et al. (2019). Clinical targets for continuous glucose monitoring data interpretation: Recommendations from the International Consensus on Time in Range. Diabetes Care, 42(8), 1593-1603. https://doi.org/10.2337/dci19-0028
+[592] 14. Campbell, P. J., Bolli, G. B., Cryer, P. E., & Gerich, J. E. (1985). Sequence of events during development of the dawn phenomenon in insulin-dependent diabetes mellitus. Metabolism, 34(12), 1100-1104. https://doi.org/10.1016/0026-0495(85)90003-4
+[593] 15. Clarke, W. L., Cox, D., Gonder-Frederick, L. A., Carter, W., & Pohl, S. L. (1987). Evaluating clinical accuracy of systems for self-monitoring of blood glucose. Diabetes Care, 10(5), 622-628. https://doi.org/10.2337/diacare.10.5.622
+[594] 16. Cleveland Clinic. (2022, December 20). Dawn phenomenon: What it is, causes, symptoms & treatment. https://my.clevelandclinic.org/health/diseases/24553-dawn-phenomenon
+[595] 17. Fellinger, P., Brandt, C., Creutzburg, J., Rommerskirchen, M., & Schmidt, K. (2024). Analytical performance of the FreeStyle Libre 2 glucose sensor in healthy male adults. Sensors, 24(17), 5769. https://doi.org/10.3390/s24175769
+[596] 18. Ford, R. B. (2024). The CEO of Abbott on revamping its breakthrough diabetes device [Web page]. Harvard Business Review. https://hbsp.harvard.edu/product/H09TTG-PDF-ENG
+[597] 19. Fraser, A. M., & Swinney, H. L. (1986). Independent coordinates for strange attractors from mutual information. Physical Review A, 33(2), 1134-1140. https://doi.org/10.1103/PhysRevA.33.1134
+[598] 20. Gardiner, C. W. (2004). Handbook of stochastic methods for physics, chemistry, and the natural sciences (3rd ed.). Springer.
+[599] 21. Goldberger, A. L., Amaral, L. A. N., Hausdorff, J. M., Ivanov, P. C., Peng, C. K., & Stanley, H. E. (2002). Fractal dynamics in physiology: Alterations with disease and aging. Proceedings of the National Academy of Sciences, 99(suppl. 1), 2466-2472. https://doi.org/10.1073/pnas.012579499
+[600] 22. Hurst, H. E. (1951). Long-term storage capacity of reservoirs. Transactions of the American Society of Civil Engineers, 116, 770-799. https://doi.org/10.1061/TACEAT.0006518
+[601] 23. Kantelhardt, J. W., Koscielny-Bunde, E., Rego, H. H. A., Havlin, S., & Bunde, A. (2001). Detecting long-range correlations with detrended fluctuation analysis. Physica A: Statistical Mechanics and its Applications, 295(3-4), 441-454. https://doi.org/10.1016/S0378-4371(01)00144-3
+[602] 24. Kasdin, N. J. (1995). Discrete simulation of colored noise and stochastic processes and 1/f^α power law noise generation. Proceedings of the IEEE, 83(5), 802-827. https://doi.org/10.1109/5.381848
+[603] 25. Kennel, M. B., Brown, R., & Abarbanel, H. D. I. (1992). Determining embedding dimension for phase-space reconstruction using a geometrical construction. Physical Review A, 45(6), 3403-3411. https://doi.org/10.1103/PhysRevA.45.3403
+[604] 26. Kohnert, K.-D., Heinke, P., Vogt, L., Augstein, P., & Salzsieder, E. (2018). Applications of variability analysis techniques for continuous glucose monitoring derived time series in diabetic patients. Frontiers in Physiology, 9, 1257. https://doi.org/10.3389/fphys.2018.01257
+[605] 27. Lamberti, P. W., Martin, M. T., Plastino, A., & Rosso, O. A. (2004). Intensive entropic non-triviality measure. Physica A: Statistical Mechanics and its Applications, 334(1-2), 119-131. https://doi.org/10.1016/j.physa.2003.11.005
+[606] 28. Lipsitz, L. A. (2002). Dynamics of stability: The physiologic basis of functional health and frailty. The Journals of Gerontology Series A: Biological Sciences and Medical Sciences, 57(3), B115-B125. https://doi.org/10.1093/gerona/57.3.B115
+[607] 29. Martin, M. T., Plastino, A., & Rosso, O. A. (2006). Generalized statistical complexity measures: Geometrical and analytical properties. Physica A: Statistical Mechanics and its Applications, 369(2), 439-462. https://doi.org/10.1016/j.physa.2005.10.099
+[608] 30. Moser, O., Eckstein, M. L., McCarthy, O., Deere, R., Pitt, J., Williams, D. M., Hayes, J., Sourij, H., Bain, S. C., & Bracken, R. M. (2019). Performance of the FreeStyle Libre flash glucose monitoring system in individuals with type 1 diabetes: A secondary outcome analysis of a randomized crossover trial. Diabetes, Obesity and Metabolism, 21(11), 2505-2512. https://doi.org/10.1111/dom.13841
+[609] 31. O’Neal, T. B., Luther, E. E., & Somoza-Cano, F. J. (2023). Dawn phenomenon. In StatPearls. StatPearls Publishing. https://www.ncbi.nlm.nih.gov/books/NBK430893/
+[610] 32. Peng, C. K., Buldyrev, S. V., Havlin, S., Simons, M., Stanley, H. E., & Goldberger, A. L. (1994). Mosaic organization of DNA nucleotides. Physical Review E, 49(2), 1685-1689. https://doi.org/10.1103/PhysRevE.49.1685
+[611] 33. Peng, C.-K., Havlin, S., Stanley, H. E., & Goldberger, A. L. (1995). Quantification of scaling exponents and crossover phenomena in nonstationary heartbeat time series. Chaos, 5(1), 82-87. https://doi.org/10.1063/1.166141
+[612] 34. Rosenstein, M. T., Collins, J. J., & De Luca, C. J. (1993). A practical method for calculating largest Lyapunov exponents from small data sets. Physica D: Nonlinear Phenomena, 65(1-2), 117-134. https://doi.org/10.1016/0167-2789(93)90009-P
+[613] 35. Sauer, T., Yorke, J. A., & Casdagli, M. (1991). Embedology. Journal of Statistical Physics, 65(3-4), 579-616. https://doi.org/10.1007/BF01053745
+[614] 36. Savitzky, A., & Golay, M. J. E. (1964). Smoothing and differentiation of data by simplified least squares procedures. Analytical Chemistry, 36(8), 1627-1639. https://doi.org/10.1021/ac60214a047
+[615] 37. Signal, M., Thomas, F., Shaw, G. M., & Chase, J. G. (2013). Complexity of continuous glucose monitoring data in critically ill patients: Continuous glucose monitoring devices, sensor locations, and detrended fluctuation analysis methods. Journal of Diabetes Science and Technology, 7(6), 1492-1506. https://doi.org/10.1177/193229681300700609
+[616] 38. Takens, F. (1981). Detecting strange attractors in turbulence. In D. A. Rand & L.-S. Young (Eds.), Dynamical systems and turbulence, Warwick 1980 (Lecture Notes in Mathematics, Vol. 898, pp. 366-381). Springer. https://doi.org/10.1007/BFb0091924
+[617] 39. Torrence, C., & Compo, G. P. (1998). A practical guide to wavelet analysis. Bulletin of the American Meteorological Society, 79(1), 61-78. https://doi.org/10.1175/1520-0477(1998)079<0061:APGTWA>2.0.CO;2
+[618] 40. U.S. Food and Drug Administration. (2024, April 23). 510(k) review memorandum (K233537): Labeling changes for FreeStyle Libre 2 and 3 systems and radiologic procedures [PDF]. https://www.accessdata.fda.gov/cdrh_docs/pdf23/K233537.pdf
+[619] 41. U.S. Food and Drug Administration. (2025, December 2). Early alert: Glucose monitor sensor issue from Abbott Diabetes Care [Web page]. https://www.fda.gov/medical-devices/medical-device-recalls-and-early-alerts/early-alert-glucose-monitor-sensor-issue-abbott-diabetes-care
+[620] 42. Welch, P. D. (1967). The use of fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms. IEEE Transactions on Audio and Electroacoustics, 15(2), 70-73. https://doi.org/10.1109/TAU.1967.1161901
+[621] 43. Wolf, A., Swift, J. B., Swinney, H. L., & Vastano, J. A. (1985). Determining Lyapunov exponents from a time series. Physica D: Nonlinear Phenomena, 16(3), 285-317. https://doi.org/10.1016/0167-2789(85)90011-9

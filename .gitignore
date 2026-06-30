@@ -1,0 +1,23 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Descargas temporales y PDFs locales
+*.pdf
+*.zip
+download_report.json
+
+# Scripts de prueba locales
+test_*.py
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# Carpetas de configuración locales
+.idea/
+.vscode/
+.streamlit/
