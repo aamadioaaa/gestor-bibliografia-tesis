@@ -111,8 +111,8 @@ def verify_pdf_content(pdf_path, query_text):
             
         print(f"  [Verificación PDF] Descartado. Palabras clave coincidentes: {matches}/{len(keywords)}")
     except Exception as e:
-        print(f"  [Verificación PDF] Error al leer para verificación: {e}")
-        return False
+        print(f"  [Verificación PDF] Error al leer para verificación (se conservará el archivo): {e}")
+        return True
     return False
 
 def download_via_web_search(reference_text, dest_path):
