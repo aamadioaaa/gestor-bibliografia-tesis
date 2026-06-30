@@ -75,6 +75,46 @@ def find_doi_via_crossref(reference_text):
         print(f"  [CrossRef] Error al consultar: {e}")
     return None
 
+def verify_pdf_content(pdf_path, query_text):
+    """
+    Verifica si el PDF descargado contiene palabras clave de la cita para evitar falsos positivos.
+    """
+    from pypdf import PdfReader
+    try:
+        reader = PdfReader(pdf_path)
+        text = ""
+        for i in range(min(2, len(reader.pages))):
+            page_text = reader.pages[i].extract_text()
+            if page_text:
+                text += page_text.lower()
+        if not text:
+            # Si no se puede extraer texto (ej. PDF escaneado sin OCR),
+            # lo dejamos pasar para evitar falsos descartes de PDFs válidos
+            return True
+            
+        # Extraer palabras clave de la consulta (más de 4 caracteres)
+        query_words = set(re.findall(r'\b\w{4,}\b', query_text.lower()))
+        # Quitar palabras genéricas muy comunes
+        stop_words = {'from', 'with', 'under', 'about', 'their', 'journal', 'review', 'study', 'analysis', 'using', 'characterizing'}
+        keywords = query_words - stop_words
+        
+        if not keywords:
+            return True
+            
+        # Contar coincidencias
+        matches = sum(1 for w in keywords if w in text)
+        min_required = min(3, len(keywords))
+        
+        # Al menos 3 palabras clave o el 35% de coincidencia
+        if matches >= min_required or (len(keywords) > 0 and (matches / len(keywords)) >= 0.35):
+            return True
+            
+        print(f"  [Verificación PDF] Descartado. Palabras clave coincidentes: {matches}/{len(keywords)}")
+    except Exception as e:
+        print(f"  [Verificación PDF] Error al leer para verificación: {e}")
+        return False
+    return False
+
 def download_via_web_search(reference_text, dest_path):
     """
     Busca en DuckDuckGo HTML links directos de PDF para la referencia y los descarga.
@@ -126,10 +166,19 @@ def download_via_web_search(reference_text, dest_path):
                     if r_pdf.status_code == 200 and r_pdf.content.startswith(b'%PDF'):
                         with open(dest_path, 'wb') as f:
                             f.write(r_pdf.content)
-                        print("  [Búsqueda Web] ¡PDF descargado con éxito!")
-                        return True
+                            
+                        # Verificar si el contenido coincide con el artículo buscado
+                        if verify_pdf_content(dest_path, query):
+                            print("  [Búsqueda Web] ¡PDF verificado y descargado con éxito!")
+                            return True
+                        else:
+                            if os.path.exists(dest_path):
+                                os.remove(dest_path)
+                            print("  [Búsqueda Web] Enlace descartado por contenido no coincidente. Intentando siguiente...")
                 except Exception as dl_err:
                     print(f"    Fallo de descarga: {dl_err}")
+                    if os.path.exists(dest_path):
+                        os.remove(dest_path)
     except Exception as e:
         print(f"  [Búsqueda Web] Error de búsqueda: {e}")
     return False
